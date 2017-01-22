@@ -1,0 +1,15 @@
+{
+  "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20160926213833",
+    "mocha": "registry:dt/mocha#2.2.5+20161221010438",
+    "node": "registry:dt/node#6.0.0+20170106143713"
+  },
+  "dependencies": {
+    "bluebird": "registry:dt/bluebird#3.0.0+20161229155504",
+    "lodash": "registry:dt/lodash#4.14.0+20170106153921",
+    "path-exists": "registry:dt/path-exists#1.0.0+20160428043022"
+  },
+  "globalDependencies": {
+    "async": "registry:dt/async#2.0.1+20161211174247"
+  }
+}
