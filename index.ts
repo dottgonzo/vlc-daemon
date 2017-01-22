@@ -55,12 +55,12 @@ export class vlcdaemon {
                 try {
                     let cvlc
                     if (that.noaudio) { // todo demuxer-readahead-packets=300 separate
-                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--no-audio","--daemon"], { detached: true, stdio: "ignore" })
+                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--avcodec-hw", "none","--no-audio", "--daemon"], { detached: true, stdio: "ignore" })
                     } else if (options) {
                         cvlc = spawn("cvlc", options, { detached: true, stdio: "ignore" })
 
                     } else {
-                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--no-audio", "--loop", "--daemon"], { detached: true, stdio: "ignore" })
+                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--avcodec-hw", "none", "--daemon"], { detached: true, stdio: "ignore" })
                     }
                     if (that.verbose) {
                         cvlc.on("error", (data) => {
