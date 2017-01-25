@@ -308,26 +308,14 @@ export class vlcdaemon {
                                                 that.playlist.push(track)
                                             });
                                             if (playnow) {
-                                                that.player_process.write(JSON.stringify({ "command": ["loadlist", playlist_path, "replace"] }) + "\r\n", () => {
-                                                    // parse file to load the list on class
-                                                    that.play().then((a) => {
-                                                        resolve(a)
-                                                    }).catch((err) => {
-                                                        reject(err)
-                                                    })
-
-
-
-                                                });
-
+               
+               
 
                                             } else {
-                                                that.player_process.write(JSON.stringify({ "command": ["loadlist", playlist_path, "replace"] }) + "\r\n", () => {
-                                                    // parse file to load the list on class
-                                                    resolve(true)
-                                                });
+             
+             
 
-
+             
                                             }
                                         }
                                     })

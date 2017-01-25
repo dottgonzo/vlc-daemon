@@ -3,10 +3,10 @@ import * as chai from "chai";
 
 // import couchauth= require("../index");
 
-import { mpvdaemon } from "../index";
+import { vlcdaemon } from "../index";
 
 
-const Player = new mpvdaemon({verbose:true})
+const Player = new vlcdaemon({verbose:true})
 
 
 
