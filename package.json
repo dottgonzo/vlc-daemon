@@ -1,6 +1,6 @@
 {
   "name": "vlc-daemon",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "vlc daemon",
   "main": "index.js",
   "scripts": {
