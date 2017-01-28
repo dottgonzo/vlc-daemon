@@ -196,7 +196,7 @@ export class vlcdaemon {
         return new Promise<true>((resolve, reject) => {
 
             if (target||target===0) {
-                let adjtarget=target+1
+                let adjtarget=target+4
                 console.log("switch to "+adjtarget)
                 that.player_process.write("goto " + adjtarget + "\n", () => {
                     if (that.track > 1) {
@@ -361,7 +361,7 @@ export class vlcdaemon {
                     if (!track.label) track.label = uniqueid(4)
                     that.playlist.push(<ITrack>track)
                     if (that.verbose) {
-                        console.log("start first track of a playlist")
+                        console.log("append track")
                     }
                     resolve(true)
                 });
@@ -370,7 +370,7 @@ export class vlcdaemon {
                     if (!track.label) track.label = uniqueid(4)
                     that.playlist.push(<ITrack>track)
                     if (that.verbose) {
-                        console.log("append track")
+                        console.log("start first track of a playlist")
                     }
                     resolve(true)
                 });
