@@ -196,7 +196,7 @@ export class vlcdaemon {
         return new Promise<true>((resolve, reject) => {
 
             if (target||target===0) {
-                let adjtarget=target+3
+                let adjtarget=target+2
                 console.log("switch to "+adjtarget)
                 that.player_process.write("goto " + adjtarget + "\n", () => {
                     if (that.track > 1) {
