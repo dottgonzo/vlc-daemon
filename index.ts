@@ -51,16 +51,23 @@ export class vlcdaemon {
         const that = this;
         return new Promise<true>((resolve, reject) => {
             if (!that.daemonized) {
-
+                const default_options = ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--image-duration=-1", "--daemon"]
                 try {
                     let cvlc
-                    if (that.noaudio) { // todo demuxer-readahead-packets=300 separate
-                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--avcodec-hw", "none", "--loop", "--image-duration=-1","--daemon"], { detached: true, stdio: "ignore" })
-                    } else if (options) {
+                    if (options) {
+                        _.map(default_options, (dopt) => {
+                            let exists = false
+                            _.map(options, (oopt) => {
+                                if (dopt === oopt) exists = true
+                            })
+                            if (!exists) options.push(dopt)
+                        })
+
+
                         cvlc = spawn("cvlc", options, { detached: true, stdio: "ignore" })
 
                     } else {
-                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--avcodec-hw", "none", "--loop", "--image-duration=-1", "--daemon"], { detached: true, stdio: "ignore" })
+                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--image-duration=-1", "--daemon"], { detached: true, stdio: "ignore" })
                     }
                     if (that.verbose) {
                         cvlc.on("error", (data) => {
@@ -195,9 +202,9 @@ export class vlcdaemon {
 
         return new Promise<true>((resolve, reject) => {
 
-            if (target||target===0) {
-                let adjtarget=target+4
-                console.log("switch to "+adjtarget)
+            if (target || target === 0) {
+                let adjtarget = target + 4
+                console.log("switch to " + adjtarget)
                 that.player_process.write("goto " + adjtarget + "\n", () => {
                     if (that.track > 1) {
 
