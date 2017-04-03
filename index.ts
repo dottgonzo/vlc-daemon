@@ -201,23 +201,25 @@ export class vlcdaemon {
         const that = this;
 
         return new Promise<true>((resolve, reject) => {
+console.log('track before is '+that.track)
+console.log('track to change is '+that.track)
 
             if (target || target === 0) {
                 let adjtarget = target + 4
                 console.log("switch to " + adjtarget)
                 that.player_process.write("goto " + adjtarget + "\n", () => {
-                    if (that.track > 1) {
+
 
                         _.map(that.playlist, (p, i) => {
 
-                            if (i !== (that.track - 1)) {
+                            if (i !== (that.track)) {
                                 that.uri = p.uri
                             }
                         })
-                        that.track += -1
+                        that.track = target
 
 
-                    }
+                    
                     resolve(true)
                 });
             } else {
@@ -461,7 +463,7 @@ export class vlcdaemon {
                             console.log("playlist loaded")
                         }
                         that.playing = true
-                        that.track = 1
+                        that.track = 0
                         that.uri = that.playlist[0].uri
                         resolve(true)
                         //         });
