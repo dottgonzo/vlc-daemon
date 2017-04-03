@@ -201,13 +201,15 @@ export class vlcdaemon {
         const that = this;
 
         return new Promise<true>((resolve, reject) => {
-console.log('track before is '+that.track)
-console.log('track to change is '+that.track)
+            console.log('track before is ' + that.track)
+            console.log('track to change is ' + target)
 
-            if (target || target === 0) {
-                let adjtarget = target + 4
-                console.log("switch to " + adjtarget)
-                that.player_process.write("goto " + adjtarget + "\n", () => {
+            if ((target || target === 0)) {
+                if (target !== that.track) {
+
+                    let adjtarget = target + 4
+                    console.log("switch to " + adjtarget)
+                    that.player_process.write("goto " + adjtarget + "\n", () => {
 
 
                         _.map(that.playlist, (p, i) => {
@@ -219,9 +221,14 @@ console.log('track to change is '+that.track)
                         that.track = target
 
 
-                    
+
+                        resolve(true)
+                    });
+                } else {
+                    console.log('is just it')
                     resolve(true)
-                });
+
+                }
             } else {
                 reject("specify target")
 
