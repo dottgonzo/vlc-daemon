@@ -9,6 +9,11 @@ import { vlcdaemon } from "../index";
 const Player = new vlcdaemon({verbose:true})
 
 
+const testsources=[
+    { uri: "v4l2:///dev/video0" },
+    { title: "test2", uri: '/home/dario/Video/streamcc-1505976677.flv.ok.flv' }
+]
+
 
 const expect = chai.expect;
 
@@ -51,12 +56,12 @@ describe("mpv class", function () {
         it("load a playlist from object", function (done) {
             this.timeout(50000);
 
-            Player.loadList([{ uri: __dirname + "/videos/best.mkv" }, { title: "test2", uri: __dirname + "/videos/what.mkv" }]).then((a) => {
+            Player.loadList(testsources).then((a) => {
                 expect(Player.playlist.length).to.be.eq(2);
-                expect(Player.playlist[0]).to.have.property('uri').that.eq(__dirname + "/videos/best.mkv");
+                expect(Player.playlist[0]).to.have.property('uri').that.eq(testsources[0].uri);
                 expect(Player.playlist[0]).to.have.property('label').that.is.a("string");
                 expect(Player.playlist[1]).to.have.property('title').that.eq("test2");
-                expect(Player.playlist[1]).to.have.property('uri').that.eq(__dirname + "/videos/what.mkv");
+                expect(Player.playlist[1]).to.have.property('uri').that.eq(testsources[1].uri);
                 expect(Player.playlist[1]).to.have.property('label').that.is.a("string");
 
 
@@ -81,7 +86,7 @@ describe("mpv class", function () {
         it("switch to next track what", function (done) {
             this.timeout(50000);
 
-            Player.next().then((a) => {
+            Player.to(1).then((a) => {
                 expect(Player.playlist.length).to.be.eq(2);
                 expect(Player).to.have.property('track').that.eq(2)
 
@@ -91,8 +96,7 @@ describe("mpv class", function () {
                 }, 23000)
 
             }).catch((err) => {
-                expect(err).to.not.exist
-                done()
+                done(Error(err))
             })
         });
 
@@ -110,8 +114,8 @@ describe("mpv class", function () {
                 }, 3000)
 
             }).catch((err) => {
-                expect(err).to.not.exist
-                done()
+
+                done(Error(err))
             })
         });
 

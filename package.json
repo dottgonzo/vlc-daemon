@@ -4,7 +4,8 @@
     "description": "vlc daemon",
     "main": "index.js",
     "scripts": {
-        "test": "mocha"
+        "test": "mocha",
+        "build": "npx gulp build"
     },
     "repository": {
         "type": "git",

@@ -146,6 +146,7 @@ export class vlcdaemon {
             if (!target || target === 1) {
                 that.player_process.write("next\n", () => {
                     if (that.track < that.playlist.length) {
+                        console.log('SWITCHING')
                         _.map(that.playlist, (p, i) => {
 
                             if (i !== (that.track + 1)) {
@@ -153,7 +154,8 @@ export class vlcdaemon {
                             }
                         })
                         that.track += 1
-                    } resolve(true)
+                    } 
+                    resolve(true)
                 });
             } else {
                 that.to(that.track + target).then((a) => {
