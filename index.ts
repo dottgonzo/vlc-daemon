@@ -24,6 +24,7 @@ interface Ivlcconf {
     socketconf?: string
     verbose?: boolean
     noaudio?: boolean
+    fullscreen?: boolean
 }
 
 
@@ -40,10 +41,12 @@ export class vlcdaemon {
     socketport: number = 5252
     verbose: boolean
     noaudio: boolean = false
+    fullscreen: boolean = false
     constructor(conf?: Ivlcconf) {
         if (conf) {
             if (conf.verbose) this.verbose = conf.verbose
             if (conf.noaudio) this.noaudio = conf.noaudio
+            if (conf.fullscreen) this.fullscreen = conf.fullscreen
         }
     }
 
@@ -52,6 +55,7 @@ export class vlcdaemon {
         return new Promise<true>((resolve, reject) => {
             if (!that.daemonized) {
                 const default_options = ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--image-duration=-1", "--daemon"]
+                if (that.fullscreen) default_options.push('--fullscreen')
                 try {
                     let cvlc
                     if (options) {
@@ -63,11 +67,15 @@ export class vlcdaemon {
                             if (!exists) options.push(dopt)
                         })
 
-
+                        console.log('cvlcopts0', options)                      
+                        
                         cvlc = spawn("cvlc", options, { detached: true, stdio: "ignore" })
 
                     } else {
-                        cvlc = spawn("cvlc", ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--image-duration=-1", "--daemon"], { detached: true, stdio: "ignore" })
+                        const cvlcopts = ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--image-duration=-1", "--daemon"]
+                        if (that.fullscreen) cvlcopts.push('--fullscreen')
+                        console.log('cvlcopts1', cvlcopts)                      
+                        cvlc = spawn("cvlc", cvlcopts, { detached: true, stdio: "ignore" })
                     }
                     if (that.verbose) {
                         cvlc.on("error", (data) => {

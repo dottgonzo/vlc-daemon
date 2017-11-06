@@ -6,7 +6,7 @@ import * as chai from "chai";
 import { vlcdaemon } from "../index";
 
 
-const Player = new vlcdaemon({verbose:true})
+const Player = new vlcdaemon({verbose:true, fullscreen: true})
 
 
 const testsources=[
