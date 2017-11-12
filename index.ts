@@ -205,7 +205,7 @@ export class vlcdaemon {
             console.log('track to change is ' + target)
 
             if ((target || target === 0)) {
-                if (target !== that.track) {
+                // if (target !== that.track) {
 
                     let adjtarget = target + 4
                     console.log("switch to " + adjtarget)
@@ -220,11 +220,11 @@ export class vlcdaemon {
 
                         resolve(true)
                     });
-                } else {
-                    console.log('is just it')
-                    resolve(true)
+                // } else {
+                //     console.log('is just it')
+                //     resolve(true)
 
-                }
+                // }
             } else {
                 reject("specify target")
 
