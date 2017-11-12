@@ -147,64 +147,54 @@ export class vlcdaemon {
         })
     }
 
-    next(target?: number) {
+    next() {
         const that = this;
 
         return new Promise<true>((resolve, reject) => {
-            if (!target || target === 1) {
+
+            const target = that.track+1
+            
+            if (target < that.playlist.length) {
+                
                 that.player_process.write("next\n", () => {
-                    if (that.track < that.playlist.length) {
-                        console.log('SWITCHING')
-                        _.map(that.playlist, (p, i) => {
-
-                            if (i !== (that.track + 1)) {
-                                that.uri = p.uri
-                            }
-                        })
-                        that.track += 1
-                    } 
-                    resolve(true)
+                        console.log('SWITCHING To '+ target)
+                        that.uri = that.playlist[target].uri
+                        
+                        that.track = target
+                        resolve(true)
+                        
                 });
-            } else {
-                that.to(that.track + target).then((a) => {
-                    resolve(a)
-                }).catch((err) => {
-                    reject(err)
-                })
+                
+            }  else {
+                resolve(true)
+                
             }
-
 
 
         })
     }
-    prev(target?: number) {
+    prev() {
         const that = this;
 
         return new Promise<true>((resolve, reject) => {
-            if (!target || target === 1) {
+            const target = that.track-1
+            if (target > -1) {
+                console.log('SWITCHING To '+ target)
+                
                 that.player_process.write("prev\n", () => {
-                    if (that.track > 1) {
 
-                        _.map(that.playlist, (p, i) => {
-
-                            if (i !== (that.track - 1)) {
-                                that.uri = p.uri
-                            }
-                        })
-                        that.track += -1
+                    that.uri = that.playlist[target].uri
+                        that.track = target
 
 
-                    }
+                    
                     resolve(true)
                 });
-            } else {
-                that.to(that.track + Math.abs(target)).then((a) => {
-                    resolve(a)
-                }).catch((err) => {
-                    reject(err)
-                })
-            }
 
+            } else {
+                resolve(true)
+                
+            }
         })
     }
     to(target: number) {
@@ -335,6 +325,8 @@ export class vlcdaemon {
                                                 track.label = uniqueid(4)
                                                 that.playlist.push(track)
                                             });
+
+                                            resolve(true)
                                             if (playnow) {
 
 

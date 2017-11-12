@@ -6,12 +6,18 @@ import * as chai from "chai";
 import { vlcdaemon } from "../index";
 
 
-const Player = new vlcdaemon({verbose:true, fullscreen: true})
+const Player = new vlcdaemon({verbose:true})
 
 
 const testsources=[
-    { uri: "v4l2:///dev/video0" },
-    { title: "test2", uri: '/home/dario/Video/streamcc-1505976677.flv.ok.flv' }
+
+    { title: "test2", uri: 'https://www.exeterphoenix.org.uk/wp-content/uploads/2013/04/zero-logo.jpg' },
+    
+    
+    { title: "test2", uri: "https://ubistatic19-a.akamaihd.net/ubicomstatic/en-US/global/media/uno-ubicom-video-launch_trailer-THUMB-712x712_Desktop_263720.jpg" },
+    { title: "test2", uri: 'https://app.due.com/assets/due/images/logo/due_logo_blk.png' },
+    { title: "test2", uri: 'http://www.punto-informatico.it/punto/20170410/windtre.jpg' },
+    { title: "test2", uri: 'https://sc01.alicdn.com/kf/HTB1kUpSFVXXXXcGXFXXq6xXFXXXk/202653291/HTB1kUpSFVXXXXcGXFXXq6xXFXXXk.jpg' }
 ]
 
 
@@ -57,20 +63,21 @@ describe("mpv class", function () {
             this.timeout(50000);
 
             Player.loadList(testsources).then((a) => {
-                expect(Player.playlist.length).to.be.eq(2);
+                expect(Player.playlist.length).to.be.eq(5);
                 expect(Player.playlist[0]).to.have.property('uri').that.eq(testsources[0].uri);
                 expect(Player.playlist[0]).to.have.property('label').that.is.a("string");
                 expect(Player.playlist[1]).to.have.property('title').that.eq("test2");
                 expect(Player.playlist[1]).to.have.property('uri').that.eq(testsources[1].uri);
                 expect(Player.playlist[1]).to.have.property('label').that.is.a("string");
-
+console.log(Player.playlist)
+console.log(Player.track)
 
             //    expect(Player.playing).to.be.ok;
 
 
                 setTimeout(function () {
                     done()
-                }, 23000)
+                }, 6000)
 
             }).catch((err) => {
                 console.log(err)
@@ -83,35 +90,99 @@ describe("mpv class", function () {
             expect(Player).to.have.property('playing').that.is.ok
         });
 
-        it("switch to next track what", function (done) {
+        it("switch to 1", function (done) {
             this.timeout(50000);
 
-            Player.to(1).then((a) => {
-                expect(Player.playlist.length).to.be.eq(2);
-                expect(Player).to.have.property('track').that.eq(2)
-
-
-                setTimeout(function () {
-                    done()
-                }, 23000)
-
-            }).catch((err) => {
-                done(Error(err))
-            })
-        });
-
-
-        it("switch to prev track best", function (done) {
-            this.timeout(50000);
-
-            Player.prev().then((a) => {
-                expect(Player.playlist.length).to.be.eq(2);
+            Player.next().then((a) => {
                 expect(Player).to.have.property('track').that.eq(1)
 
 
                 setTimeout(function () {
                     done()
-                }, 3000)
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+
+
+        it("switch to 0", function (done) {
+            this.timeout(50000);
+
+            Player.prev().then((a) => {
+                expect(Player).to.have.property('track').that.eq(0)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+
+                done(Error(err))
+            })
+        });
+
+        it("switch to 1", function (done) {
+            this.timeout(50000);
+
+            Player.next().then((a) => {
+                expect(Player).to.have.property('track').that.eq(1)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+
+        it("switch to 2", function (done) {
+            this.timeout(50000);
+
+            Player.next().then((a) => {
+                expect(Player).to.have.property('track').that.eq(2)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+
+
+        it("switch to 3", function (done) {
+            this.timeout(50000);
+
+            Player.next().then((a) => {
+                expect(Player).to.have.property('track').that.eq(3)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+
+        it("switch to 2", function (done) {
+            this.timeout(50000);
+
+            Player.prev().then((a) => {
+                expect(Player).to.have.property('track').that.eq(2)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
 
             }).catch((err) => {
 
@@ -120,8 +191,74 @@ describe("mpv class", function () {
         });
 
 
+        it("switch to 3", function (done) {
+            this.timeout(50000);
 
-    
+            Player.next().then((a) => {
+                expect(Player).to.have.property('track').that.eq(3)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+
+
+
+        it("switch to 2", function (done) {
+            this.timeout(50000);
+
+            Player.prev().then((a) => {
+                expect(Player).to.have.property('track').that.eq(2)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+
+                done(Error(err))
+            })
+        });
+
+
+        it("switch to 1", function (done) {
+            this.timeout(50000);
+
+            Player.prev().then((a) => {
+                expect(Player).to.have.property('track').that.eq(1)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+
+                done(Error(err))
+            })
+        });
+
+        it("switch to 3", function (done) {
+            this.timeout(50000);
+
+            Player.to(3).then((a) => {
+                expect(Player).to.have.property('track').that.eq(3)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
 
     });
 });
