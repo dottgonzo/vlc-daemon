@@ -90,6 +90,57 @@ console.log(Player.track)
             expect(Player).to.have.property('playing').that.is.ok
         });
 
+
+
+        it("switch to 4", function (done) {
+            this.timeout(50000);
+
+            Player.to(4).then((a) => {
+                expect(Player).to.have.property('track').that.eq(4)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+        it("switch to 2", function (done) {
+            this.timeout(50000);
+
+            Player.to(2).then((a) => {
+                expect(Player).to.have.property('track').that.eq(2)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+        it("switch to 0", function (done) {
+            this.timeout(50000);
+
+            Player.to(0).then((a) => {
+                expect(Player).to.have.property('track').that.eq(0)
+
+
+                setTimeout(function () {
+                    done()
+                }, 6000)
+
+            }).catch((err) => {
+                done(Error(err))
+            })
+        });
+
+
+
+
         it("switch to 1", function (done) {
             this.timeout(50000);
 

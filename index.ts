@@ -212,12 +212,8 @@ export class vlcdaemon {
                     that.player_process.write("goto " + adjtarget + "\n", () => {
 
 
-                        _.map(that.playlist, (p, i) => {
-
-                            if (i !== (that.track)) {
-                                that.uri = p.uri
-                            }
-                        })
+                        that.uri = that.playlist[target].uri
+                        
                         that.track = target
 
 
