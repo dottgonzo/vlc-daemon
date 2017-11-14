@@ -129,7 +129,7 @@ export class vlcdaemon {
         return new Promise<true>((resolve, reject) => {
 
             if (target > 0) {
-                that.next(target).then((a) => {
+                that.next().then((a) => {
                     resolve(a)
                 }).catch((err) => {
                     reject(err)
@@ -137,7 +137,7 @@ export class vlcdaemon {
             } else if (target === 0) {
                 reject({ error: "nothing to do" })
             } else {
-                that.prev(target).then((a) => {
+                that.prev().then((a) => {
                     resolve(a)
                 }).catch((err) => {
                     reject(err)
