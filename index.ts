@@ -154,7 +154,7 @@ export class vlcdaemon {
 
             const target = that.track+1
             
-            if (target < that.playlist.length) {
+            if (target < that.playlist.length && that.playlist[target]) {
                 
                 that.player_process.write("next\n", () => {
                         console.log('SWITCHING To '+ target)
@@ -179,17 +179,23 @@ export class vlcdaemon {
         return new Promise<true>((resolve, reject) => {
             const target = that.track-1
             if (target > -1) {
-                console.log('SWITCHING To '+ target)
-                
-                that.player_process.write("prev\n", () => {
-
-                    that.uri = that.playlist[target].uri
-                        that.track = target
-
-
+                if(that.playlist[target]){
+                    console.log('SWITCHING To '+ target)
                     
+                    that.player_process.write("prev\n", () => {
+    
+                        that.uri = that.playlist[target].uri
+                            that.track = target
+    
+    
+                        
+                        resolve(true)
+                    });
+                } else {
                     resolve(true)
-                });
+                    
+                }
+
 
             } else {
                 resolve(true)
@@ -204,7 +210,7 @@ export class vlcdaemon {
             console.log('track before is ' + that.track)
             console.log('track to change is ' + target)
 
-            if ((target || target === 0)) {
+            if ((target || target === 0) && that.playlist[target]) {
                 // if (target !== that.track) {
 
                     let adjtarget = target + 4
