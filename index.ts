@@ -1,623 +1,411 @@
-import { spawn } from "child_process"
-import * as Promise from "bluebird";
-import * as _ from "lodash";
-const pathExists = require("path-exists");
-import * as async from "async";
-import * as net from "net";
-import * as fs from "fs";
+import { spawn } from "child_process";
+import net from "net";
+import fs from "fs/promises";
 import { uniqueid } from "unicoid";
-
+import { setTimeout } from "timers/promises";
 interface ITrackload {
-  title?: string
-  label?: string
-  uri: string
-
+  title?: string;
+  label?: string;
+  uri: string;
 }
-
 
 interface ITrack extends ITrackload {
   label: string;
 }
 
 interface Ivlcconf {
-  socketfile?: string
-  socketconf?: string
-  verbose?: boolean
-  noaudio?: boolean
-  fullscreen?: boolean
+  socketfile?: string;
+  socketconf?: string;
+  verbose?: boolean;
+  noaudio?: boolean;
+  fullscreen?: boolean;
 }
 
-
+function writeToVlc(proc: any, str: string) {
+  return new Promise((resolve, reject) => {
+    proc.write(str, (err) => {
+      if (err) return reject(err);
+      resolve(true);
+    });
+  });
+}
 
 export class vlcdaemon {
-
   playlist: ITrack[] = [];
-  track: number = 0
-  uri: string = ""
-  daemonized: boolean = false
-  playing: boolean = false
-  player_process: any = false
-  socket: any
-  socketport: number = 5252
-  verbose: boolean
-  noaudio: boolean = false
-  fullscreen: boolean = false
+  track: number = 0;
+  uri: string = "";
+  daemonized: boolean = false;
+  playing: boolean = false;
+  player_process: any = false;
+  socket: any;
+  socketport: number = 5252;
+  verbose: boolean;
+  noaudio: boolean = false;
+  fullscreen: boolean = false;
   constructor(conf?: Ivlcconf) {
     if (conf) {
-      if (conf.verbose) this.verbose = conf.verbose
-      if (conf.noaudio) this.noaudio = conf.noaudio
-      if (conf.fullscreen) this.fullscreen = conf.fullscreen
+      if (conf.verbose) this.verbose = conf.verbose;
+      if (conf.noaudio) this.noaudio = conf.noaudio;
+      if (conf.fullscreen) this.fullscreen = conf.fullscreen;
     }
   }
 
-  start(options?: string[]) {
-    const that = this;
-    return new Promise<true>((resolve, reject) => {
-      if (!that.daemonized) {
-        const default_options = ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--image-duration=-1", "--daemon"]
-        if (that.fullscreen) default_options.push('--fullscreen')
-        try {
-          let cvlc
-          if (options) {
-            _.map(default_options, (dopt) => {
-              let exists = false
-              _.map(options, (oopt) => {
-                if (dopt === oopt) exists = true
-              })
-              if (!exists) options.push(dopt)
-            })
+  async start(options?: string[]) {
+    if (!this.daemonized) {
+      const default_options = [
+        "-I",
+        "rc",
+        "--rc-fake-tty",
+        "--no-osd",
+        "--no-mouse-events",
+        "--no-keyboard-events",
+        "--rc-host",
+        "localhost:" + this.socketport,
+        "--loop",
+        "--image-duration=-1",
+        "--daemon",
+      ];
+      if (this.fullscreen) default_options.push("--fullscreen");
 
-            console.log('cvlcopts0', options)
-
-            cvlc = spawn("cvlc", options, { detached: true, stdio: "ignore" })
-
-          } else {
-            const cvlcopts = ["-I", "rc", "--rc-fake-tty", "--no-osd", "--no-mouse-events", "--no-keyboard-events", "--rc-host", "localhost:" + that.socketport, "--loop", "--image-duration=-1", "--daemon"]
-            if (that.fullscreen) cvlcopts.push('--fullscreen')
-            console.log('cvlcopts1', cvlcopts)
-            cvlc = spawn("cvlc", cvlcopts, { detached: true, stdio: "ignore" })
-          }
-          if (that.verbose) {
-            cvlc.on("error", (data) => {
-              console.log("error: " + data)
-            })
-          }
-          setTimeout(() => {
-
-            that.player_process = net.createConnection(that.socketport, "localhost");
-            that.player_process.on("connect", function () { // add timeout
-              if (!that.daemonized) {
-                that.daemonized = true
-
-                resolve(true)
-
-              }
-
-            });
-            if (that.verbose) {
-              that.player_process.on("data", function (data) { // add timeout
-                console.log("vlcdata: " + data)
-              });
-              that.player_process.on("error", function (data) { // add timeout
-                console.log("vlcerror: " + data)
-              });
-            }
-
-
-          }, 5000)
-
-        } catch (err) {
-          reject(err)
+      let cvlc;
+      if (options) {
+        for (const dopt of default_options) {
+          if (!options.find((f) => f === dopt)) options.push(dopt);
         }
 
+        console.log("cvlcopts0", options);
 
-
-
+        cvlc = spawn("cvlc", options, { detached: true, stdio: "ignore" });
       } else {
-        reject({ error: "player is running" })
-
+        const cvlcopts = [
+          "-I",
+          "rc",
+          "--rc-fake-tty",
+          "--no-osd",
+          "--no-mouse-events",
+          "--no-keyboard-events",
+          "--rc-host",
+          "localhost:" + this.socketport,
+          "--loop",
+          "--image-duration=-1",
+          "--daemon",
+        ];
+        if (this.fullscreen) cvlcopts.push("--fullscreen");
+        console.log("cvlcopts1", cvlcopts);
+        cvlc = spawn("cvlc", cvlcopts, { detached: true, stdio: "ignore" });
       }
-
-
-    })
-
-  }
-
-  switch(target: number) { // relative 
-    const that = this;
-
-    return new Promise<true>((resolve, reject) => {
-
-      if (target > 0) {
-        that.next().then((a) => {
-          resolve(a)
-        }).catch((err) => {
-          reject(err)
-        })
-      } else if (target === 0) {
-        reject({ error: "nothing to do" })
-      } else {
-        that.prev().then((a) => {
-          resolve(a)
-        }).catch((err) => {
-          reject(err)
-        })
-      }
-
-    })
-  }
-
-  next() {
-    const that = this;
-
-    return new Promise<true>((resolve, reject) => {
-
-      const target = that.track + 1
-
-      if (target < that.playlist.length && that.playlist[target]) {
-
-        that.player_process.write("next\n", () => {
-          console.log('SWITCHING To ' + target)
-          that.uri = that.playlist[target].uri
-
-          that.track = target
-          resolve(true)
-
+      if (this.verbose) {
+        cvlc.on("error", (data) => {
+          console.log("error: " + data);
         });
-
-      } else {
-        resolve(true)
-
       }
+      await setTimeout(5000);
+      this.player_process = net.createConnection(this.socketport, "localhost");
+      const that = this;
 
-
-    })
-  }
-  prev() {
-    const that = this;
-
-    return new Promise<true>((resolve, reject) => {
-      const target = that.track - 1
-      if (target > -1) {
-        if (that.playlist[target]) {
-          console.log('SWITCHING To ' + target)
-
-          that.player_process.write("prev\n", () => {
-
-            that.uri = that.playlist[target].uri
-            that.track = target
-
-
-
-            resolve(true)
-          });
-        } else {
-          resolve(true)
-
+      this.player_process.on("connect", function () {
+        // add timeout
+        if (!that.daemonized) {
+          that.daemonized = true;
         }
-
-
-      } else {
-        resolve(true)
-
-      }
-    })
-  }
-  to(target: number) {
-    const that = this;
-
-    return new Promise<true>((resolve, reject) => {
-      console.log('track before is ' + that.track)
-      console.log('track to change is ' + target)
-
-      if ((target || target === 0) && that.playlist[target]) {
-        // if (target !== that.track) {
-
-        let adjtarget = target + 4
-        console.log("switch to " + adjtarget)
-        that.player_process.write("goto " + adjtarget + "\n", () => {
-
-
-          that.uri = that.playlist[target].uri
-
-          that.track = target
-
-
-
-          resolve(true)
+      });
+      if (this.verbose) {
+        this.player_process.on("data", function (data) {
+          // add timeout
+          console.log("vlcdata: " + data);
         });
-        // } else {
-        //     console.log('is just it')
-        //     resolve(true)
-
-        // }
-      } else {
-        reject("specify target")
-
-      }
-
-    })
-  }
-
-
-  stop() {
-    const that = this;
-
-    return new Promise<true>((resolve, reject) => {
-      try {
-        that.player_process.write("stop\n", () => {
-          // parse file to load the list on class
-
-          that.track = 0
-          that.playlist = []
-          that.playing = false
-          that.uri = ""
-          resolve(true)
+        this.player_process.on("error", function (data) {
+          // add timeout
+          console.log("vlcerror: " + data);
         });
-
-
-
-      } catch (err) {
-        reject({ error: err })
       }
-
-
-    })
+    } else {
+      console.error("player is just running");
+    }
   }
 
+  async switch(target: number) {
+    // relative
+
+    if (target > 0) {
+      await this.next();
+    } else if (target === 0) {
+      console.error("nothing to do");
+    } else {
+      await this.prev();
+    }
+  }
+
+  async next() {
+    const target = this.track + 1;
+
+    if (target < this.playlist.length && this.playlist[target]) {
+      await writeToVlc(this.player_process, "next\n");
+
+      console.log("SWITCHING To " + target);
+      this.uri = this.playlist[target].uri;
+
+      this.track = target;
+    } else {
+      console.warn("not to do");
+    }
+  }
+  async prev() {
+    const target = this.track - 1;
+    if (target > -1 && this.playlist[target]) {
+      console.log("SWITCHING To " + target);
+
+      await writeToVlc(this.player_process, "prev\n");
+      this.uri = this.playlist[target].uri;
+      this.track = target;
+    } else {
+      console.warn("not this now");
+    }
+  }
+  async to(target: number) {
+    console.log("track before is " + this.track);
+    console.log("track to change is " + target);
+
+    if ((target || target === 0) && this.playlist[target]) {
+      // if (target !== that.track) {
+
+      let adjtarget = target + 4;
+      console.log("switch to " + adjtarget);
+
+      await writeToVlc(this.player_process, "goto " + adjtarget + "\n");
+
+      this.uri = this.playlist[target].uri;
+
+      this.track = target;
+
+      // } else {
+      //     console.log('is just it')
+      //     resolve(true)
+
+      // }
+    } else {
+      console.error("specify target");
+    }
+  }
+
+  async stop() {
+    await writeToVlc(this.player_process, "stop\n");
+
+    // parse file to load the list on class
+
+    this.track = 0;
+    this.playlist = [];
+    this.playing = false;
+    this.uri = "";
+  }
 
   end() {
     const that = this;
 
     return new Promise<true>((resolve, reject) => {
-      try {
-        that.player_process.kill()
-        that.daemonized = false
-        that.track = 0
-        that.playlist = []
-        that.playing = false
-        that.uri = ""
-        resolve(true)
-      } catch (err) {
-        reject({ error: err })
-      }
-
-
-    })
-  }
-  loadListfromFile(playlist_path: string, playnow?: true) {
-    const that = this;
-    return new Promise<true>((resolve, reject) => {
-      if (playlist_path && playlist_path.split('.pls').length > 1) {
-        pathExists(playlist_path).then((a) => {
-          if (a) {
-            if (that.daemonized) {
-              fs.readFile(playlist_path, (err, data) => {
-                if (err) {
-                  console.log("errload")
-
-                  reject({ error: err })
-                } else {
-                  fs.readFile(playlist_path, function (err, data) {
-                    if (err) {
-                      console.log({ error: err })
-                      reject({ error: err })
-                    } else {
-
-                      const datatoarray = data.toString().split("\n")
-                      const tracks = []
-                      _.map(datatoarray, function (data) {
-                        if (data.split('=').length > 1 && data.split('NumberOfEntries=').length < 2 && data.split('Version=').length < 2) {
-
-                          const index = parseInt(data.split('=')[0][data.split('=')[0].length - 1])
-
-                          if (tracks.length < index) {
-                            tracks.push({})
-                          }
-                          if (data.split('File').length > 1) {
-                            tracks[index - 1].uri = data.split(data.split('=')[0] + "=")[1]
-                          } else if (data.split('Title').length > 1) {
-                            tracks[index - 1].title = data.split(data.split('=')[0] + "=")[1]
-                          }
-                        }
-                      })
-
-                      that.playlist = []
-                      _.map(tracks, function (track) {
-                        track.label = uniqueid(4)
-                        that.playlist.push(track)
-                      });
-
-                      resolve(true)
-                      if (playnow) {
-
-
-
-                      } else {
-
-
-
-
-                      }
-                    }
-                  })
-
-                }
-              })
-
-            } else {
-              reject({ error: "vlc not started" })
-
-            }
-
-          } else {
-            console.log("erro")
-
-            reject({ error: "wrong path" })
-          }
-        }).catch((err) => {
-          reject(err)
-
-        })
-      } else {
-        console.log("erro")
-        reject({ error: "file must be a .pls file" })
-
-      }
+      that.player_process.kill((err) => {
+        if (err) return reject(err);
+        that.daemonized = false;
+        that.track = 0;
+        that.playlist = [];
+        that.playing = false;
+        that.uri = "";
+        resolve(true);
+      });
     });
-
   }
+  async loadListfromFile(playlist_path: string, playnow?: true) {
+    if (playlist_path && playlist_path.split(".pls").length > 1) {
+      if (this.daemonized) {
+        const data = await fs.readFile(playlist_path, "utf-8");
 
-  addTrack(track: ITrackload, index?: number) {
-    const that = this;
-    return new Promise<true>((resolve, reject) => {
+        const datatoarray = data.toString().split("\n");
+        const tracks = [];
+        for (const data of datatoarray) {
+          if (
+            data.split("=").length > 1 &&
+            data.split("NumberOfEntries=").length < 2 &&
+            data.split("Version=").length < 2
+          ) {
+            const index = parseInt(
+              data.split("=")[0][data.split("=")[0].length - 1]
+            );
 
-
-
-
-
-      if (that.playlist.length > 0) {
-        that.player_process.write("enqueue " + track.uri + "\n", () => {
-          if (!track.label) track.label = uniqueid(4)
-          that.playlist.push(<ITrack>track)
-          if (that.verbose) {
-            console.log("append track")
-          }
-          resolve(true)
-        });
-      } else {
-        that.player_process.write("add " + track.uri + "\n", () => {
-          if (!track.label) track.label = uniqueid(4)
-          that.playlist.push(<ITrack>track)
-          if (that.verbose) {
-            console.log("start first track of a playlist")
-          }
-          resolve(true)
-        });
-      }
-
-    });
-
-
-
-
-  }
-
-  clearList() {
-    const that = this;
-    return new Promise<true>((resolve, reject) => {
-      if (that.playlist.length > 0) {
-
-        let preserve: ITrack
-        that.player_process.write("clear\n", () => {
-          _.map(that.playlist, (t) => {
-            if (t.uri === that.uri) {
-              preserve = t
+            if (tracks.length < index) {
+              tracks.push({});
             }
-          })
-          if (preserve) {
-            that.playlist = [preserve]
-          } else {
-            that.playlist = []
-          }
-
-          if (that.verbose) {
-            console.log("clear playlist")
-          }
-          resolve(true)
-        })
-      } else {
-        resolve(true)
-
-      }
-
-    });
-
-  }
-  loadList(tracks: ITrackload[]) {
-    const that = this;
-    return new Promise<true>((resolve, reject) => {
-      if (that.playing) {
-        that.clearList().then(() => {
-          async.eachSeries(tracks, (track, cb) => {
-            that.addTrack(track).then((a) => {
-              cb()
-            }).catch((err) => {
-              cb(err)
-            })
-          }, (err) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(true)
-
+            if (data.split("File").length > 1) {
+              tracks[index - 1].uri = data.split(data.split("=")[0] + "=")[1];
+            } else if (data.split("Title").length > 1) {
+              tracks[index - 1].title = data.split(data.split("=")[0] + "=")[1];
             }
-          })
-        }).catch((err) => {
-          reject(err)
-        })
-      } else {
-
-        async.eachSeries(tracks, (track, cb) => {
-          that.addTrack(track).then((a) => {
-            cb()
-          }).catch((err) => {
-            cb(err)
-          })
-        }, (err) => {
-          if (err) {
-            reject(err)
-          } else {
-
-            //    that.player_process.write(JSON.stringify({ "command": ["playlist-remove", "current"] }) + "\r\n", () => {
-            if (that.verbose) {
-              console.log("playlist loaded")
-            }
-            that.playing = true
-            that.track = 0
-            that.uri = that.playlist[0].uri
-            resolve(true)
-            //         });
-
-
-
-
-
           }
-        })
-
-
-
-      }
-
-    })
-
-
-  }
-
-  play(play_path?: string) {
-    const that = this;
-
-    return new Promise<true>((resolve, reject) => {
-      if (play_path) { // not working!!
-        if (that.playlist.length > 1) {
-          that.clearList().then(() => {
-            console.log(play_path)
-            that.addTrack({ uri: play_path }).then(() => {
-              that.player_process.write(JSON.stringify({ "command": ["playlist-remove", "current"] }) + "\r\n", () => {
-                that.playlist = []
-
-                that.playlist.push({ uri: play_path, label: uniqueid(6) })
-                that.playing = true
-                that.uri = play_path
-                that.track = 1
-                resolve(true)
-              });
-
-            }).catch((err) => {
-              reject(err)
-            })
-
-          }).catch((err) => {
-            that.addTrack({ uri: play_path }).then(() => {
-              that.player_process.write(JSON.stringify({ "command": ["playlist-remove", "current"] }) + "\r\n", () => {
-                that.playlist = []
-
-                that.playlist.push({ uri: play_path, label: uniqueid(6) })
-                that.playing = true
-                that.uri = play_path
-                that.track = 1
-                resolve(true)
-              });
-
-            }).catch((err) => {
-              reject(err)
-            })
-
-          })
-        } else if (that.playlist.length === 1) {
-          that.addTrack({ uri: play_path }).then(() => {
-            that.player_process.write(JSON.stringify({ "command": ["playlist-remove", "current"] }) + "\r\n", () => {
-              that.playlist = []
-
-              that.playlist.push({ uri: play_path, label: uniqueid(6) })
-              that.playing = true
-              that.uri = play_path
-              that.track = 1
-              resolve(true)
-            });
-
-          }).catch((err) => {
-            reject(err)
-          })
-        } else {
-          that.player_process.write(JSON.stringify({ "command": ["loadfile", play_path] }) + "\r\n", () => {
-            that.playlist.push({ uri: play_path, label: uniqueid(6) })
-
-            that.playing = true
-            that.uri = play_path
-            that.track = 1
-            resolve(true)
-          });
-
         }
 
-
-      } else if (that.playlist.length > 0 && !that.playing) {
-
-        that.player_process.write(JSON.stringify({ "command": ["play"] }) + "\r\n", () => {
-          that.playing = true
-          if (!that.track) that.track = 1
-          if (!that.uri) that.uri = that.playlist[0].uri
-
-          resolve(true)
-        });
-
+        this.playlist = tracks.map((t) =>
+          Object.assign(t, { label: uniqueid(4) })
+        );
       } else {
-        reject("nothing to play")
-
+        throw new Error("vlc not started");
       }
-
-
-    })
+    } else {
+      throw new Error("wrong pls file");
+    }
   }
-  pause() {
-    const that = this;
 
-    return new Promise<true>((resolve, reject) => {
+  async addTrack(track: ITrackload, index?: number) {
+    if (this.playlist.length > 0) {
+      await writeToVlc(this.player_process, "enqueue " + track.uri + "\n");
 
-      that.player_process.write(JSON.stringify({ "command": ["play"] }) + "\r\n", () => {
-        that.playing = false
+      if (!track.label) track.label = uniqueid(4);
+      this.playlist.push(<ITrack>track);
+      if (this.verbose) {
+        console.log("append track");
+      }
+    } else {
+      await writeToVlc(this.player_process, "add " + track.uri + "\n");
 
-        resolve(true)
-      });
+      if (!track.label) track.label = uniqueid(4);
+      this.playlist.push(<ITrack>track);
+      if (this.verbose) {
+        console.log("start first track of a playlist");
+      }
+    }
+  }
 
-    })
+  async clearList() {
+    if (this.playlist.length > 0) {
+      await writeToVlc(this.player_process, "clear\n");
+
+      if (this.playlist.find((f) => f.uri === this.uri))
+        this.playlist = [this.playlist.find((f) => f.uri === this.uri)];
+      else this.playlist = [];
+
+      if (this.verbose) {
+        console.log("clear playlist");
+      }
+    }
+  }
+  async loadList(tracks: ITrackload[]) {
+    if (this.playing) {
+      await this.clearList();
+      for (const track of tracks) {
+        await this.addTrack(track);
+      }
+    } else {
+      for (const track of tracks) {
+        await this.addTrack(track);
+      }
+      //    that.player_process.write(JSON.stringify({ "command": ["playlist-remove", "current"] }) + "\r\n", () => {
+      if (this.verbose) {
+        console.log("playlist loaded");
+      }
+      this.playing = true;
+      this.track = 0;
+      this.uri = this.playlist[0].uri;
+    }
+  }
+
+  async play(play_path?: string) {
+    if (play_path) {  
+      // not working!!
+      if (this.playlist.length > 1) {
+        try {
+          await this.clearList();
+          console.log(play_path);
+          await this.addTrack({ uri: play_path });
+
+          await writeToVlc(
+            this.player_process,
+            JSON.stringify({
+              command: ["playlist-remove", "current"],
+            }) + "\r\n"
+          );
+
+          this.playlist = [];
+
+          this.playlist.push({
+            uri: play_path,
+            label: uniqueid(6),
+          });
+          this.playing = true;
+          this.uri = play_path;
+          this.track = 1;
+        } catch (err) {
+          await this.addTrack({ uri: play_path });
+          await writeToVlc(
+            this.player_process,
+            JSON.stringify({
+              command: ["playlist-remove", "current"],
+            }) + "\r\n"
+          );
+
+          this.playlist = [];
+
+          this.playlist.push({
+            uri: play_path,
+            label: uniqueid(6),
+          });
+          this.playing = true;
+          this.uri = play_path;
+          this.track = 1;
+        }
+      } else if (this.playlist.length === 1) {
+        await this.addTrack({ uri: play_path });
+
+        await writeToVlc(
+          this.player_process,
+          JSON.stringify({
+            command: ["playlist-remove", "current"],
+          }) + "\r\n"
+        );
+
+        this.playlist = [];
+
+        this.playlist.push({ uri: play_path, label: uniqueid(6) });
+        this.playing = true;
+        this.uri = play_path;
+        this.track = 1;
+      } else {
+        await writeToVlc(
+          this.player_process,
+          JSON.stringify({ command: ["loadfile", play_path] }) + "\r\n"
+        );
+
+        this.playlist.push({ uri: play_path, label: uniqueid(6) });
+
+        this.playing = true;
+        this.uri = play_path;
+        this.track = 1;
+      }
+    } else if (this.playlist.length > 0 && !this.playing) {
+      await writeToVlc(
+        this.player_process,
+        JSON.stringify({ command: ["play"] }) + "\r\n"
+      );
+
+      this.playing = true;
+      if (!this.track) this.track = 1;
+      if (!this.uri) this.uri = this.playlist[0].uri;
+    } else {
+      throw new Error("nothing to play");
+    }
+  }
+  async pause() {
+    await writeToVlc(
+      this.player_process,
+      JSON.stringify({ command: ["play"] }) + "\r\n"
+    );
+    this.playing = false;
   }
   playTrack() {
-    return new Promise<true>((resolve, reject) => {
-
-
-
-    })
+    return new Promise<true>((resolve, reject) => {});
   }
 
   nextTrack() {
-    return new Promise<true>((resolve, reject) => {
-
-
-
-    })
+    return new Promise<true>((resolve, reject) => {});
   }
   previousTrack() {
-    return new Promise<true>((resolve, reject) => {
-
-
-
-    })
+    return new Promise<true>((resolve, reject) => {});
   }
-
-
-
 }
-

@@ -1,6 +1,26 @@
 "use strict";
-var net = require("net");
-var mpv_process = net.createConnection(5252, "localhost");
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const net = __importStar(require("net"));
+const mpv_process = net.createConnection(5252, "localhost");
 mpv_process.on("connect", function () {
     console.log("connected");
 });
@@ -10,13 +30,14 @@ mpv_process.on("data", function (data) {
 mpv_process.on("error", function (data) {
     console.log("mpverror: " + data + "\n");
 });
-setTimeout(function () {
-    mpv_process.write("add " + __dirname + "/test/videos/toccata.mp4" + "\n\t", function () {
+// xset -dpms
+setTimeout(() => {
+    mpv_process.write("add " + __dirname + "/test/videos/toccata.mp4" + "\n\t", () => {
         console.log("added1");
-        setTimeout(function () {
-            mpv_process.write("add " + __dirname + "/test/videos/hoedown.mp4" + "\n\t", function () {
-                setTimeout(function () {
-                    mpv_process.write("add " + __dirname + "/test/videos/daddy.mp4" + "\n\t", function () {
+        setTimeout(() => {
+            mpv_process.write("add " + __dirname + "/test/videos/hoedown.mp4" + "\n\t", () => {
+                setTimeout(() => {
+                    mpv_process.write("add " + __dirname + "/test/videos/daddy.mp4" + "\n\t", () => {
                         console.log("added2");
                     });
                 }, 10000);
@@ -24,5 +45,4 @@ setTimeout(function () {
         }, 10000);
     });
 }, 2000);
-
-//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3RpbmcudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBLHlCQUEyQjtBQUUzQixJQUFNLFdBQVcsR0FBRyxHQUFHLENBQUMsZ0JBQWdCLENBQUMsSUFBSSxFQUFFLFdBQVcsQ0FBQyxDQUFBO0FBSzNELFdBQVcsQ0FBQyxFQUFFLENBQUMsU0FBUyxFQUFFO0lBQ3RCLE9BQU8sQ0FBQyxHQUFHLENBQUMsV0FBVyxDQUFDLENBQUE7QUFFNUIsQ0FBQyxDQUFDLENBQUM7QUFHSCxXQUFXLENBQUMsRUFBRSxDQUFDLE1BQU0sRUFBRSxVQUFVLElBQUk7SUFDakMsT0FBTyxDQUFDLEdBQUcsQ0FBQyxXQUFXLEdBQUcsSUFBSSxHQUFHLElBQUksQ0FBQyxDQUFBO0FBQzFDLENBQUMsQ0FBQyxDQUFDO0FBQ0gsV0FBVyxDQUFDLEVBQUUsQ0FBQyxPQUFPLEVBQUUsVUFBVSxJQUFJO0lBQ2xDLE9BQU8sQ0FBQyxHQUFHLENBQUMsWUFBWSxHQUFHLElBQUksR0FBRyxJQUFJLENBQUMsQ0FBQTtBQUMzQyxDQUFDLENBQUMsQ0FBQztBQUVILFVBQVUsQ0FBQztJQUNQLFdBQVcsQ0FBQyxLQUFLLENBQUMsTUFBTSxHQUFHLFNBQVMsR0FBRywwQkFBMEIsR0FBRyxNQUFNLEVBQUU7UUFDeEUsT0FBTyxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUMsQ0FBQTtRQUVyQixVQUFVLENBQUM7WUFDUCxXQUFXLENBQUMsS0FBSyxDQUFDLE1BQU0sR0FBRyxTQUFTLEdBQUcsMEJBQTBCLEdBQUcsTUFBTSxFQUFFO2dCQUV4RSxVQUFVLENBQUM7b0JBQ1AsV0FBVyxDQUFDLEtBQUssQ0FBQyxNQUFNLEdBQUcsU0FBUyxHQUFHLHdCQUF3QixHQUFHLE1BQU0sRUFBRTt3QkFFdEUsT0FBTyxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUMsQ0FBQTtvQkFFekIsQ0FBQyxDQUFDLENBQUE7Z0JBQ04sQ0FBQyxFQUFFLEtBQUssQ0FBQyxDQUFBO1lBQ2IsQ0FBQyxDQUFDLENBQUE7UUFDTixDQUFDLEVBQUUsS0FBSyxDQUFDLENBQUE7SUFDYixDQUFDLENBQUMsQ0FBQTtBQUNOLENBQUMsRUFBRSxJQUFJLENBQUMsQ0FBQSIsImZpbGUiOiJ0ZXN0aW5nLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0ICogYXMgbmV0IGZyb20gXCJuZXRcIjtcblxuY29uc3QgbXB2X3Byb2Nlc3MgPSBuZXQuY3JlYXRlQ29ubmVjdGlvbig1MjUyLCBcImxvY2FsaG9zdFwiKVxuXG5cblxuXG5tcHZfcHJvY2Vzcy5vbihcImNvbm5lY3RcIiwgZnVuY3Rpb24gKCkgeyAvLyBhZGQgdGltZW91dFxuICAgIGNvbnNvbGUubG9nKFwiY29ubmVjdGVkXCIpXG5cbn0pO1xuXG5cbm1wdl9wcm9jZXNzLm9uKFwiZGF0YVwiLCBmdW5jdGlvbiAoZGF0YSkgeyAvLyBhZGQgdGltZW91dFxuICAgIGNvbnNvbGUubG9nKFwibXB2ZGF0YTogXCIgKyBkYXRhICsgXCJcXG5cIilcbn0pO1xubXB2X3Byb2Nlc3Mub24oXCJlcnJvclwiLCBmdW5jdGlvbiAoZGF0YSkgeyAvLyBhZGQgdGltZW91dFxuICAgIGNvbnNvbGUubG9nKFwibXB2ZXJyb3I6IFwiICsgZGF0YSArIFwiXFxuXCIpXG59KTtcbi8vIHhzZXQgLWRwbXNcbnNldFRpbWVvdXQoKCkgPT4ge1xuICAgIG1wdl9wcm9jZXNzLndyaXRlKFwiYWRkIFwiICsgX19kaXJuYW1lICsgXCIvdGVzdC92aWRlb3MvdG9jY2F0YS5tcDRcIiArIFwiXFxuXFx0XCIsICgpID0+IHtcbiAgICAgICAgY29uc29sZS5sb2coXCJhZGRlZDFcIilcblxuICAgICAgICBzZXRUaW1lb3V0KCgpID0+IHtcbiAgICAgICAgICAgIG1wdl9wcm9jZXNzLndyaXRlKFwiYWRkIFwiICsgX19kaXJuYW1lICsgXCIvdGVzdC92aWRlb3MvaG9lZG93bi5tcDRcIiArIFwiXFxuXFx0XCIsICgpID0+IHtcblxuICAgICAgICAgICAgICAgIHNldFRpbWVvdXQoKCkgPT4ge1xuICAgICAgICAgICAgICAgICAgICBtcHZfcHJvY2Vzcy53cml0ZShcImFkZCBcIiArIF9fZGlybmFtZSArIFwiL3Rlc3QvdmlkZW9zL2RhZGR5Lm1wNFwiICsgXCJcXG5cXHRcIiwgKCkgPT4ge1xuXG4gICAgICAgICAgICAgICAgICAgICAgICBjb25zb2xlLmxvZyhcImFkZGVkMlwiKVxuXG4gICAgICAgICAgICAgICAgICAgIH0pXG4gICAgICAgICAgICAgICAgfSwgMTAwMDApXG4gICAgICAgICAgICB9KVxuICAgICAgICB9LCAxMDAwMClcbiAgICB9KVxufSwgMjAwMCkiXX0=
+//# sourceMappingURL=testing.js.map
