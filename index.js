@@ -212,7 +212,7 @@ class vlcdaemon {
                         }
                     }
                 }
-                this.playlist = tracks.map((t) => Object.assign(t, { label: (0, unicoid_1.uniqueid)(4) }));
+                this.playlist = tracks.map((t) => Object.assign(t, { label: t.label || (0, unicoid_1.uniqueid)(4) }));
             }
             else {
                 throw new Error("vlc not started");
